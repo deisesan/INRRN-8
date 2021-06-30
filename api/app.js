@@ -3,7 +3,7 @@ const app = express();
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const cors = require('cors');
-const {promisify} = require('util');
+const { eAdmin } = require('./middlewares/auth')
 
 app.use(express.json());
 
@@ -15,7 +15,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/usuarios', validarToken, function (req, res) {
+app.get('/usuarios', eAdmin, function (req, res) {
 
     return res.json({
         erro: false, 
@@ -50,36 +50,6 @@ app.post('/login', function (req, res) {
     });
 
 })
-
-//Verificação do Token
-async function validarToken (req, res, next){
-    const authHeader = req.headers.authorization;
-    const [, token] = authHeader.split(' ');
-
-    if(!token){
-        return res.json({
-            erro: true,
-            message: "Error: Necessário realizar Login para acessar a Página!"
-        });
-    }
-
-    try{
-        const decode = await promisify(jwt.verify)(token, process.env.SECRET);
-        
-        req.userId = jwt.decode.id;
-
-        return next();
-
-    } catch(erro) {
-        
-        return res.json({
-            erro: true,
-            message: "Error: Login ou Senha Inválido!"
-        });
-
-    }
-
-}
 
 app.listen(8080, function(){
         console.log("Servidor Iniciado na Porta 8080: http://localhost:8080/");
